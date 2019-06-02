@@ -3,7 +3,7 @@ red=$(tput setaf 1)
 green=$(tput setaf 2)
 reset=$(tput sgr0)
 START_TIME=$(date +%Y-%m-%d--%H%M%S)
-SCRIPT_NAME="gen-clusterRegistrationToken-yamls.sh"
+SCRIPT_NAME="instant-etcd-benchmark.sh"
 function helpmenu() {
     echo "Usage: ${SCRIPT_NAME}
 "
