@@ -103,7 +103,7 @@ benchmark --cert $ETCDCTL_CERT --key $ETCDCTL_KEY --cacert $ETCDCTL_CACERT --con
 else
     echo "${green}#etcd is only listening on ${REQUIRE_ENDPOINT}, we need to pass --endpoints${reset}"
     echo ${green}'#Benchmark commands to try out'${reset}'
-${red}export REQUIRE_ENDPOINT=$(docker exec etcd netstat -lpna | grep \:2379 | grep tcp | grep LISTEN | tr -s "' '" | cut -d"' '" -f4)${reset}
+export REQUIRE_ENDPOINT=$(docker exec etcd netstat -lpna | grep \:2379 | grep tcp | grep LISTEN | tr -s "' '" | cut -d"' '" -f4)
 
 
 benchmark --endpoints ${REQUIRE_ENDPOINT} --cert $ETCDCTL_CERT --key $ETCDCTL_KEY --cacert $ETCDCTL_CACERT --target-leader --conns=1 --clients=1 put --key-size=8 --sequential-keys --total=10000 --val-size=256 2> /dev/null
