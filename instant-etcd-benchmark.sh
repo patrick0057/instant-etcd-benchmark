@@ -61,33 +61,31 @@ fi
     export GOROOT=/usr/local/go
     export GOPATH=$HOME/Projects/Proj1
     export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-    echo ${green}'If you installed go with this script then set these environment variables either temporarily or permanently by adding them to your ~/.bash_profile.'${red}'
+    echo ${green}'#If you installed go with this script then set these environment variables either temporarily or permanently by adding them to your ~/.bash_profile.'${red}'
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/Projects/Proj1
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 '${reset}
 echo
 echo
-echo
 
 
 #Install Benchmark:
 if ! hash benchmark 2>/dev/null; then
-    echo ${green}'getting benchmark with "go get go.etcd.io/etcd/tools/benchmark"'${reset}
+    echo ${green}'#getting benchmark with "go get go.etcd.io/etcd/tools/benchmark"'${reset}
     go get go.etcd.io/etcd/tools/benchmark
     checkpipecmd "go get benchmark failed"
 fi
 
 #Set and verify ETCDCTL_CACERT, ETCDCTL_CERT and ETCDCTL_KEY:
-echo "${green}Set these environment variables either temporarily or permanently by adding them to your ~/.bash_profile.${red}"
+echo "${green}#Set these environment variables either temporarily or permanently by adding them to your ~/.bash_profile.${reset}"
 export $(docker exec -ti etcd env | grep \/kubernetes)
 for var in $(docker inspect --format '{{ .Config.Env }}' etcd | sed 's/[][]//g'); do
     if [[ "$var" == *"ETCDCTL_CACERT"* ]] || [[ "$var" == *"ETCDCTL_CERT"* ]] || [[ "$var" == *"ETCDCTL_KEY"* ]]; then
         export ${var}
-        echo export ${var}
+        echo ${red}export ${var}${reset}
     fi
 done
-echo "${reset}"
 echo
 echo
 
@@ -96,16 +94,18 @@ echo
 #Benchmark commands that need to be run are below.
 export REQUIRE_ENDPOINT=$(docker exec etcd netstat -lpna | grep \:2379 | grep tcp | grep LISTEN | tr -s ' ' | cut -d' ' -f4)
 if [[ $REQUIRE_ENDPOINT =~ ":::" ]]; then
-    echo "${green}etcd is listening on ${REQUIRE_ENDPOINT}, no need to pass --endpoints${reset}"
-    echo ${green}'Benchmark commands to try out'${reset}'
+    echo "${green}#etcd is listening on ${REQUIRE_ENDPOINT}, no need to pass --endpoints${reset}"
+    echo ${green}'#Benchmark commands to try out'${reset}'
 benchmark --cert $ETCDCTL_CERT --key $ETCDCTL_KEY --cacert $ETCDCTL_CACERT --target-leader --conns=1 --clients=1 put --key-size=8 --sequential-keys --total=10000 --val-size=256 2> /dev/null
 benchmark --cert $ETCDCTL_CERT --key $ETCDCTL_KEY --cacert $ETCDCTL_CACERT --target-leader  --conns=100 --clients=1000 put --key-size=8 --sequential-keys --total=100000 --val-size=256 2> /dev/null
 benchmark --cert $ETCDCTL_CERT --key $ETCDCTL_KEY --cacert $ETCDCTL_CACERT --conns=100 --clients=1000 put --key-size=8 --sequential-keys --total=100000 --val-size=256 2> /dev/null
 '${reset}
 else
-    echo "${green}etcd is only listening on ${REQUIRE_ENDPOINT}, we need to pass --endpoints${reset}"
-    echo ${green}'Benchmark commands to try out'${reset}'
-export REQUIRE_ENDPOINT=$(docker exec etcd netstat -lpna | grep \:2379 | grep tcp | grep LISTEN | tr -s "' '" | cut -d"' '" -f4)
+    echo "${green}#etcd is only listening on ${REQUIRE_ENDPOINT}, we need to pass --endpoints${reset}"
+    echo ${green}'#Benchmark commands to try out'${reset}'
+${red}export REQUIRE_ENDPOINT=$(docker exec etcd netstat -lpna | grep \:2379 | grep tcp | grep LISTEN | tr -s "' '" | cut -d"' '" -f4)${reset}
+
+
 benchmark --endpoints ${REQUIRE_ENDPOINT} --cert $ETCDCTL_CERT --key $ETCDCTL_KEY --cacert $ETCDCTL_CACERT --target-leader --conns=1 --clients=1 put --key-size=8 --sequential-keys --total=10000 --val-size=256 2> /dev/null
 benchmark --endpoints ${REQUIRE_ENDPOINT} --cert $ETCDCTL_CERT --key $ETCDCTL_KEY --cacert $ETCDCTL_CACERT --target-leader  --conns=100 --clients=1000 put --key-size=8 --sequential-keys --total=100000 --val-size=256 2> /dev/null
 benchmark --endpoints ${REQUIRE_ENDPOINT} --cert $ETCDCTL_CERT --key $ETCDCTL_KEY --cacert $ETCDCTL_CACERT --conns=100 --clients=1000 put --key-size=8 --sequential-keys --total=100000 --val-size=256 2> /dev/null
